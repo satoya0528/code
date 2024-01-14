@@ -6,7 +6,7 @@ import numpy as np
 
 # スクレイピング
 weather_info_tmp = []
-for i in range(12,13):
+for i in range(1,13):
     url = f'https://www.data.jma.go.jp/obd/stats/etrn/view/daily_s1.php?prec_no=46&block_no=47670&year=2023&month={i}&day=1&view=p1'
     response = requests.get(url)
     response.encoding = 'utf-8'
@@ -21,7 +21,6 @@ for i in range(12,13):
     time.sleep(0.5)
 
 # データの整形
-# monthly_data = []
 weather_info = []
 for i in range(len(weather_info_tmp)):
     numpy_data = np.array(weather_info_tmp[i])
@@ -32,9 +31,6 @@ for i in range(len(weather_info_tmp)):
         data = np.append(data, [j + 1])
         tup = tuple(data)
         weather_info.append(tup)
-        # monthly_data.append(tup)
-    # weather_info.append(monthly_data)
-
 
 # dbに保存
 path = "./db/"
@@ -71,8 +67,8 @@ CREATE TABLE weather(
 drop_table_weather = "DROP TABLE IF EXISTS weather"
 cur.execute(drop_table_weather)
 cur.execute(create_table_weather)
-sql_insert_many = "INSERT INTO weather VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
 
+sql_insert_many = "INSERT INTO weather VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
 cur.executemany(sql_insert_many, weather_info)
 con.commit()
 con.close()
