@@ -6,7 +6,7 @@ import numpy as np
 
 # スクレイピング
 weather_info_tmp = []
-for i in range(1,13):
+for i in range(12,13):
     url = f'https://www.data.jma.go.jp/obd/stats/etrn/view/daily_s1.php?prec_no=46&block_no=47670&year=2023&month={i}&day=1&view=p1'
     response = requests.get(url)
     response.encoding = 'utf-8'
@@ -26,24 +26,24 @@ weather_info = []
 for i in range(len(weather_info_tmp)):
     numpy_data = np.array(weather_info_tmp[i])
     reshaped_data = numpy_data.reshape(-1, 20)
-    cleaned_data = np.where(reshaped_data == "--", np.nan, reshaped_data)
-    for j in cleaned_data:
-        j = np.append(j, [i + 1])
-        tup = tuple(j)
+    cleaned_data = np.where((reshaped_data == "--") | (reshaped_data == "-- )"), np.nan, reshaped_data)
+    for j in range(len(cleaned_data)):
+        data = np.append(cleaned_data[j], [i + 1])
+        data = np.append(data, [j + 1])
+        tup = tuple(data)
         weather_info.append(tup)
         # monthly_data.append(tup)
     # weather_info.append(monthly_data)
 
 
 # dbに保存
-path = "../db/"
+path = "./db/"
 db_name = "課題.sqlite"
 con = sqlite3.connect(path + db_name)
 cur = con.cursor()
 
 create_table_weather = """
 CREATE TABLE weather(
-    id INTEGER PRIMARY KEY,
     現地気圧 REAL,
     海面気圧 REAL,
     降水合計 REAL,
@@ -63,11 +63,15 @@ CREATE TABLE weather(
     降雪 REAL,
     積雪 REAL,
     昼 TEXT,
-    夜 TEXT
+    夜 TEXT,
+    月 REAL,
+    日 REAL
     )
 """
+drop_table_weather = "DROP TABLE IF EXISTS weather"
+cur.execute(drop_table_weather)
 cur.execute(create_table_weather)
-sql_insert_many = "INSERT INTO weather VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+sql_insert_many = "INSERT INTO weather VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
 
 cur.executemany(sql_insert_many, weather_info)
 con.commit()
