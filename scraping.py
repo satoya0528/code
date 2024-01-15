@@ -21,7 +21,6 @@ for i in range(1,13):
     time.sleep(0.5)
 
 # データの整形
-monthly_data = []
 weather_info = []
 for i in range(len(weather_info_tmp)):
     numpy_data = np.array(weather_info_tmp[i])
@@ -31,8 +30,7 @@ for i in range(len(weather_info_tmp)):
         data = np.append(cleaned_data[j], [i + 1])
         data = np.append(data, [j + 1])
         tup = tuple(data)
-        monthly_data.append(tup)
-    weather_info.append(monthly_data)
+        weather_info.append(tup)
 
 # dbに保存
 path = "./db/"
@@ -71,7 +69,6 @@ cur.execute(drop_table_weather)
 cur.execute(create_table_weather)
 
 sql_insert_many = "INSERT INTO weather VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
-for insert in weather_info:
-    cur.executemany(sql_insert_many, insert)
+cur.executemany(sql_insert_many, weather_info)
 con.commit()
 con.close()
